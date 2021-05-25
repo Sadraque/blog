@@ -8,17 +8,19 @@ from sqlite3 import Error
 app = Flask(__name__)
 
 @app.route('/topicos/cadastrar', methods=['GET', 'POST'])
-def cadastrar():
+def topicos():
 
     if request.method == 'POST':
+        titulo = request.form['titulo']
+        autor = request.form['autor']
         descricao = request.form['descricao']
 
         if descricao:
-            cadastarTopico(descricao)
+            insertTopico(titulo, autor, descricao)
 
-    return render_template('cadastrar.html')
+    return render_template('topicoForm.html')
 
-@app.route('/topicos/listar', methods=['GET'])
+@app.route('/', methods=['GET'])
 def listar():
     try:
         conn = sqlite3.connect('database/db-blog.db')
@@ -42,15 +44,15 @@ def listar():
 def pagina_nao_encontrada(e):
     return render_template('404.html'), 404
 
-def cadastarTopico(descricao):
+def insertTopico(titulo, autor, descricao):
     try:
-        conn = sqlite3.connect('database/db-blog.db')
+        conn = connectDB()
 
-        sql = ''' INSERT INTO topicos(descricao) VALUES(?) '''
+        sql = ''' INSERT INTO topicos(titulo, autor, descricao) VALUES(?,?,?) '''
 
         cursor = conn.cursor()
 
-        cursor.execute(sql, [descricao])
+        cursor.execute(sql, [titulo, autor, descricao])
 
         conn.commit()
 
@@ -58,8 +60,13 @@ def cadastarTopico(descricao):
         print(e)
 
     finally:
-        conn.close()
+        disconnectDB(conn)
 
+def connectDB():
+    return sqlite3.connect('database/db-blog.db')
+
+def disconnectDB(conn):
+    conn.close()
 
 if __name__ == '__main__':
     app.run()
