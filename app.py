@@ -18,14 +18,14 @@ def topicos():
         if descricao:
             insertTopico(titulo, autor, descricao)
 
-    return render_template('topicoForm.html')
+    return listar()
 
 @app.route('/', methods=['GET'])
 def listar():
     try:
         conn = sqlite3.connect('database/db-blog.db')
 
-        sql = '''SELECT * FROM topicos'''
+        sql = '''SELECT titulo, autor, descricao FROM topicos'''
 
         cur = conn.cursor()
 
@@ -33,7 +33,7 @@ def listar():
 
         registros = cur.fetchall()
 
-        return render_template('listar.html', regs=registros)
+        return render_template('topicos.html', regs=registros)
 
     except Error as e:
         print(e)
